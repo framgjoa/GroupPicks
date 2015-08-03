@@ -221,9 +221,9 @@ var buildGroups = function(){
   //Define cohort by name
   var mks19 = ["Suzanne", "Shu", "Matt", "Carter", "Jason", "Ricky", "David",
       "Brendan", "Adi", "Colin", "Ian", "Thomas", "Patrick", "James",
-      "Ryan", "Mike", "Jim", "Yoshi", "Richie", "Vincent", "Stephen"];
+      "Ryan", "Mike", "Jim", "Yoshi", "Richie", "Vincent", "Stephen", "Chris"];
 
-  var mks19GroupSizes = [5,4,4,4,4]
+  var mks19GroupSizes = [5,5,4,4,4]
 
 
   var MKS19 = new ThesisGroups(mks19, mks19GroupSizes)
