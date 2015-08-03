@@ -115,8 +115,8 @@ ThesisGroups.prototype.assignRoundOne = function(){
               this.sortedRanks.pop();
 
               this.finalGroups[g].push(currentPerson);
-              console.log(currentPerson, " assigned to ", g);
-              //Need to add this person's pick to group picks
+              //console.log(currentPerson, " assigned to ", g);
+              //Add this person's pick to group picks
               this.addGroupPicks(currentPerson, g);
               console.log("GroupCumPicks: ", this.groupCumulativePicks[g]);
               groupNotSeeded = false;
@@ -142,6 +142,7 @@ ThesisGroups.prototype.assignNextRounds = function(){
     var groupNotSeeded = true;
     //var currentRanking = this.sortedRanks[this.sortedRanks.length - 1]
      //find index of fewest rankings
+     var randomIndex = Math.floor(this.nameList.length*Math.random())
 
      for(var j = 0; j< max; j++){ //steps through People
       var currentPerson = this.nameList[j];
@@ -151,7 +152,7 @@ ThesisGroups.prototype.assignNextRounds = function(){
          //&&
          (!this.assignedNames[currentPerson])
          && (groupNotSeeded)
-         && (seededsPicks[j]===1 )
+         && (this.groupCumulativePicks[g][j]===1 )
          && (this.finalGroups[g].length < this.groupSizes[g])
          ){
         //assign group
@@ -169,6 +170,7 @@ ThesisGroups.prototype.assignNextRounds = function(){
           }
           //console.log("NextRounds updated: ", this.finalGroups)
         }
+
 };
 
 ThesisGroups.prototype.assignGroups = function(){
@@ -192,15 +194,20 @@ ThesisGroups.prototype.randomGroup= function(size){
   return  Math.floor(size * Math.random())
 }
 
-var buildGroups = function(){
-  var mks19 = ["Suzanne", "Shu", "Matt", "Carter", "Jason", "Ricky", "David",
-      "Brendan", "Adi", "Colin", "Ian", "Thomas", "Patrick", "James", "Chris",
-      "Ryan", "Mike", "Jim", "Yoshi", "Richie", "Vincent", "Stephen"];
 
-  var MKS19 = new ThesisGroups(mks19, [5,5,4,4,4])
+//Edits will happen here
+var buildGroups = function(){
+  //Define cohort by name
+  var mks19 = ["Suzanne", "Shu", "Matt", "Carter", "Jason", "Ricky", "David",
+      "Brendan", "Adi", "Colin", "Ian", "Thomas", "Patrick", "James",
+      "Ryan", "Mike", "Jim", "Yoshi", "Richie", "Vincent", "Stephen"];
+  var mks19GroupSizes = [5,4,4,4,4]
+
+
+  var MKS19 = new ThesisGroups(mks19, mks19GroupSizes)
 
   MKS19.generateMatrix(mks19);
-  MKS19.generateFinalGroups([5,5,4,4,4]);
+  MKS19.generateFinalGroups(mks19GroupSizes);
 
  // Generate random picks
     for(var i = 0; i < mks19.length; i++){
@@ -211,6 +218,32 @@ var buildGroups = function(){
       }
       MKS19.addPicks(mks19[i], localPicks);
     }
+//Manually add picks
+/*
+  MKS19.addPicks("Suzanne", []);
+  MKS19.addPicks("Shu", []);
+  MKS19.addPicks("Matt", []);
+  MKS19.addPicks("Carter", []);
+  MKS19.addPicks("Jason", []);
+  MKS19.addPicks("Ricky", []);
+  MKS19.addPicks("David", []);
+  MKS19.addPicks("Brendan", []);
+  MKS19.addPicks("Adi", []);
+  MKS19.addPicks("Colin", []);
+  MKS19.addPicks("Ian", []);
+  MKS19.addPicks("Thomas", []);
+  MKS19.addPicks("Patrick", []);
+  MKS19.addPicks("James", []);
+  MKS19.addPicks("Ryan", []);
+  MKS19.addPicks("Mike", []);
+  MKS19.addPicks("Jim", []);
+  MKS19.addPicks("Yoshi", []);
+  MKS19.addPicks("Richie", []);
+  MKS19.addPicks("Vincent", []);
+  MKS19.addPicks("Stephen", []);
+
+*/
+
 
   MKS19.pickedRanksCondensed();
   MKS19.sortRanks();
