@@ -5,8 +5,17 @@ var ThesisGroups = function(nameList, groupSizes){
   this.pickMatrix = [];
   this.finalGroups = [];
   this.rankedArray = [];
-
+  this.assignedNames = {};
+  this.sortedRanks=[];
+  this.groupCumulativePicks=[];
 }
+
+ThesisGroups.prototype.sortRanks = function(){
+  var temp = this.rankedArray.slice();
+  this.sortedRanks = temp.sort(function(a, b){return b-a});
+  console.log("sortedRanks", this.sortedRanks)
+};
+
 
 ThesisGroups.prototype.generateMatrix = function(nameList){
   var size = this.nameList.length;
@@ -39,10 +48,39 @@ ThesisGroups.prototype.addPicks = function(name, indivPicks){
   }
 }
 
+ThesisGroups.prototype.addGroupPicks = function(name, groupNumber){
+  var pickerColIndex = this.nameList.indexOf(name);
+
+  if(this.groupCumulativePicks.length===0
+    || !this.groupCumulativePicks[groupNumber]
+    ){
+  // First time through for generation
+   this.groupCumulativePicks[groupNumber]=[];
+   for(var i = 0; i< this.nameList.length; i++){
+     if(this.pickMatrix[i][pickerColIndex] === 1){
+       this.groupCumulativePicks[groupNumber].push(1);
+     }else{
+       this.groupCumulativePicks[groupNumber].push(0);
+      }
+    }
+  }else{
+  for(var i = 0; i< this.nameList.length; i++){
+    //var pickeeRowIndex = this.nameList.indexOf( name);
+
+    if( (this.pickMatrix[i][pickerColIndex]) === 1
+      || (this.groupCumulativePicks[groupNumber][i]===1 )){
+      this.groupCumulativePicks[groupNumber][i]=1;
+    }else{
+      this.groupCumulativePicks[groupNumber][i]=0;
+      }
+    }
+
+  }
+}
+
 ThesisGroups.prototype.pickedRanksCondensed = function(){
   var size = this.nameList.length;
   var finalRank = 0
-
 
   for(var i = 0; i< size; i++){
     // Rows per name
@@ -57,52 +95,97 @@ ThesisGroups.prototype.pickedRanksCondensed = function(){
 };
 
 
-ThesisGroups.prototype.assignGroups = function(){
+ThesisGroups.prototype.assignRoundOne = function(){
   var max = this.nameList.length;
-  var assignedNames = {};
-  //Seed first two people in each group
-  for(var gn = 0; gn < 5; gn++){
-  for(var i = 0; i< max; i++){ //lowest value in rankedArray
-    //find index of fewest rankings
-    for(var j = 0; j< max; j++){ //steps through People
+
+  //Seed first one person in each group
+  for(var g = 0; g <this.groupSizes.length; g++){
+    var groupNotSeeded = true;
+    var currentRanking = this.sortedRanks[this.sortedRanks.length - 1]
+     //find index of fewest rankings
+
+     for(var j = 0; j< max; j++){ //steps through People
       var currentPerson = this.nameList[j];
-      //console.log("current: ", currentPerson, "assigned: ", assignedNames[currentPerson] );
-      if((this.rankedArray[j] === i) && (!assignedNames[currentPerson])){
-        //assign group
-        //var randomGroupIndex = randomGroup(groupSizes.length);
-        var currentGroup = this.finalGroups[gn]
-        //check if group is full
-        //console.log("Group", randomGroupIndex, " length checks: ", currentGroup.length, groupSizes[randomGroupIndex]);
-        if((!assignedNames[currentPerson]) ){
-        //find one of their ranked people
-          for(var k = 0; k < this.nameList.length; k++){
-            if((this.pickMatrix[j][k]===1) && (!assignedNames[this.nameList[k]])){
-              assignedNames[currentPerson] = true;
-              assignedNames[this.nameList[k]] = true;
 
-              this.finalGroups[gn].push(currentPerson);
-              this.finalGroups[gn].push(this.nameList[k]);
-              console.log("Assigned people: ", assignedNames)
-              console.log(currentPerson, " and ", this.nameList[k], " assigned to ", gn);
-              console.log("FinalGroup updated: ", this.finalGroups)
+      if((this.rankedArray[j] === currentRanking) && (!this.assignedNames[currentPerson])
+         && groupNotSeeded){
 
+              var currentGroup = this.finalGroups[g]
+              this.assignedNames[currentPerson] = true;
+              this.sortedRanks.pop();
+
+              this.finalGroups[g].push(currentPerson);
+              console.log(currentPerson, " assigned to ", g);
+              //Need to add this person's pick to group picks
+              this.addGroupPicks(currentPerson, g);
+              console.log("GroupCumPicks: ", this.groupCumulativePicks[g]);
+              groupNotSeeded = false;
             }
           }
-          console.log("FinalGroup updated: ", this.finalGroups)
+          console.log("FirstRounds updated: ", this.finalGroups)
         }
-        }
-      }
-    }
-  }
 
+  //console.log("Final Groups, Round 1: ", this.finalGroups);
+  console.log("sortedRanks: ", this.sortedRanks)
+};
+
+ThesisGroups.prototype.assignNextRounds = function(){
+  var max = this.nameList.length;
+
+  for(var g = 0; g <this.groupSizes.length; g++){
+    //Look up seeded person's picks
+    var seededPerson = this.finalGroups[g][this.finalGroups[g].length-1];
+    var seededIndex = this.nameList.indexOf(seededPerson);
+    var seededsPicks = this.pickMatrix[seededIndex];
+    //console.log("Seeded: ", seededPerson, seededIndex, this.pickMatrix[seededIndex]);
+
+    var groupNotSeeded = true;
+    //var currentRanking = this.sortedRanks[this.sortedRanks.length - 1]
+     //find index of fewest rankings
+
+     for(var j = 0; j< max; j++){ //steps through People
+      var currentPerson = this.nameList[j];
+      //debugger;
+      if(
+            //(this.rankedArray[j] === currentRanking)
+         //&&
+         (!this.assignedNames[currentPerson])
+         && (groupNotSeeded)
+         && (seededsPicks[j]===1 )
+         && (this.finalGroups[g].length < this.groupSizes[g])
+         ){
+        //assign group
+        //var randomGroupIndex = randomGroup(groupSizes.length);
+              var currentGroup = this.finalGroups[g]
+              this.assignedNames[currentPerson] = true;
+              //this.sortedRanks.pop();
+
+              this.finalGroups[g].push(currentPerson);
+              console.log(currentPerson, " assigned to ", g);
+              this.addGroupPicks(currentPerson, g);
+              console.log("GroupCumPicks: ", this.groupCumulativePicks[g]);
+              groupNotSeeded = false;
+            }
+          }
+          //console.log("NextRounds updated: ", this.finalGroups)
+        }
+};
+
+ThesisGroups.prototype.assignGroups = function(){
   console.log("Final Final Groups: ", this.finalGroups);
 };
 
-ThesisGroups.prototype.assignRoundOne = function(){};
 
-ThesisGroups.prototype.assignNextRounds = function(){};
-
-
+ThesisGroups.prototype.groupsFullCheck= function(){
+  var currentGroups = this.finalGroups;
+  var expectedGroups = this.groupSizes;
+  for(var i = 0; i < currentGroups.length; i++){
+    if(currentGroups[i].length !== expectedGroups[i].length){
+      return false;
+    }
+    return true;
+  }
+}
 
 
 ThesisGroups.prototype.randomGroup= function(size){
@@ -128,8 +211,17 @@ var buildGroups = function(){
       }
       MKS19.addPicks(mks19[i], localPicks);
     }
+
   MKS19.pickedRanksCondensed();
-  MKS19.assignGroups();
+  MKS19.sortRanks();
+  MKS19.assignRoundOne();
+  MKS19.assignNextRounds();
+  MKS19.assignNextRounds();
+  MKS19.assignNextRounds();
+  MKS19.assignNextRounds();
+
+  console.log("FinalFinal Groups: ", MKS19.finalGroups);
+  console.log("assignedNames: ", MKS19.assignedNames);
 }
 
 buildGroups();
