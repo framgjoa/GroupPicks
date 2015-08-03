@@ -8,6 +8,7 @@ var ThesisGroups = function(nameList, groupSizes){
   this.assignedNames = {};
   this.sortedRanks=[];
   this.groupCumulativePicks=[];
+  this.round = 2;
 }
 
 ThesisGroups.prototype.sortRanks = function(){
@@ -91,7 +92,7 @@ ThesisGroups.prototype.pickedRanksCondensed = function(){
     }
     this.rankedArray.push(finalRank);
   }
-  console.log("Final condensed: ", this.rankedArray)
+  //console.log("Final condensed: ", this.rankedArray)
 };
 
 
@@ -116,17 +117,17 @@ ThesisGroups.prototype.assignRoundOne = function(){
 
               this.finalGroups[g].push(currentPerson);
               //console.log(currentPerson, " assigned to ", g);
+
               //Add this person's pick to group picks
               this.addGroupPicks(currentPerson, g);
-              console.log("GroupCumPicks: ", this.groupCumulativePicks[g]);
+              //console.log("GroupCumPicks: ", this.groupCumulativePicks[g]);
               groupNotSeeded = false;
             }
           }
-          console.log("FirstRounds updated: ", this.finalGroups)
         }
 
   //console.log("Final Groups, Round 1: ", this.finalGroups);
-  console.log("sortedRanks: ", this.sortedRanks)
+  //console.log("sortedRanks: ", this.sortedRanks)
 };
 
 ThesisGroups.prototype.assignNextRounds = function(){
@@ -134,22 +135,25 @@ ThesisGroups.prototype.assignNextRounds = function(){
 
   for(var g = 0; g <this.groupSizes.length; g++){
     //Look up seeded person's picks
-    var seededPerson = this.finalGroups[g][this.finalGroups[g].length-1];
-    var seededIndex = this.nameList.indexOf(seededPerson);
-    var seededsPicks = this.pickMatrix[seededIndex];
+    // var seededPerson = this.finalGroups[g][this.finalGroups[g].length-1];
+    // var seededIndex = this.nameList.indexOf(seededPerson);
+    // var seededsPicks = this.pickMatrix[seededIndex];
     //console.log("Seeded: ", seededPerson, seededIndex, this.pickMatrix[seededIndex]);
+
+    var randomIndex = Math.floor(this.nameList.length * Math.random())
+    //console.log("Random Index: ", randomIndex);
 
     var groupNotSeeded = true;
     //var currentRanking = this.sortedRanks[this.sortedRanks.length - 1]
      //find index of fewest rankings
-     var randomIndex = Math.floor(this.nameList.length*Math.random())
-
+     //while(this.finalGroups[g].length< this.round){
      for(var j = 0; j< max; j++){ //steps through People
       var currentPerson = this.nameList[j];
+      //var randomIndex = Math.floor(this.nameList.length * Math.random())
+      //var currentPerson = this.nameList[randomIndex];
       //debugger;
+
       if(
-            //(this.rankedArray[j] === currentRanking)
-         //&&
          (!this.assignedNames[currentPerson])
          && (groupNotSeeded)
          && (this.groupCumulativePicks[g][j]===1 )
@@ -162,14 +166,20 @@ ThesisGroups.prototype.assignNextRounds = function(){
               //this.sortedRanks.pop();
 
               this.finalGroups[g].push(currentPerson);
-              console.log(currentPerson, " assigned to ", g);
+              //console.log(currentPerson, " assigned to ", g);
               this.addGroupPicks(currentPerson, g);
-              console.log("GroupCumPicks: ", this.groupCumulativePicks[g]);
+              //console.log("GroupCumPicks: ", this.groupCumulativePicks[g]);
               groupNotSeeded = false;
+
+            }else{
+              var randomIndex = Math.floor(this.nameList.length * Math.random())
             }
+
           }
+          this.round++;
           //console.log("NextRounds updated: ", this.finalGroups)
         }
+
 
 };
 
@@ -194,6 +204,17 @@ ThesisGroups.prototype.randomGroup= function(size){
   return  Math.floor(size * Math.random())
 }
 
+ThesisGroups.prototype.shuffle= function(deck){
+  var index, temp;
+  for (var i = 0; i < deck.length; i++){
+    //generate random number from i to deck.length-1 (inclusive)
+    index = Math.floor(Math.random()*(deck.length-i))+i;
+    //swap values
+    temp = deck[index];
+    deck[index] = deck[i];
+    deck[i] = temp;
+  }
+}
 
 //Edits will happen here
 var buildGroups = function(){
@@ -201,10 +222,13 @@ var buildGroups = function(){
   var mks19 = ["Suzanne", "Shu", "Matt", "Carter", "Jason", "Ricky", "David",
       "Brendan", "Adi", "Colin", "Ian", "Thomas", "Patrick", "James",
       "Ryan", "Mike", "Jim", "Yoshi", "Richie", "Vincent", "Stephen"];
+
   var mks19GroupSizes = [5,4,4,4,4]
 
 
   var MKS19 = new ThesisGroups(mks19, mks19GroupSizes)
+  MKS19.shuffle(mks19);
+  console.log("shuffle: ", mks19)
 
   MKS19.generateMatrix(mks19);
   MKS19.generateFinalGroups(mks19GroupSizes);
@@ -240,18 +264,16 @@ var buildGroups = function(){
   MKS19.addPicks("Yoshi", []);
   MKS19.addPicks("Richie", []);
   MKS19.addPicks("Vincent", []);
-  MKS19.addPicks("Stephen", []);
+  MKS19.addPicks("David", []);
 
 */
-
 
   MKS19.pickedRanksCondensed();
   MKS19.sortRanks();
   MKS19.assignRoundOne();
-  MKS19.assignNextRounds();
-  MKS19.assignNextRounds();
-  MKS19.assignNextRounds();
-  MKS19.assignNextRounds();
+  for(var i = 0; i< MKS19.nameList.length;i++){
+    MKS19.assignNextRounds();
+  }
 
   console.log("FinalFinal Groups: ", MKS19.finalGroups);
   console.log("assignedNames: ", MKS19.assignedNames);
