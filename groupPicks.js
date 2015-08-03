@@ -221,9 +221,9 @@ var buildGroups = function(){
   //Define cohort by name
   var mks19 = ["Suzanne", "Shu", "Matt", "Carter", "Jason", "Ricky", "David",
       "Brendan", "Adi", "Colin", "Ian", "Thomas", "Patrick", "James",
-      "Ryan", "Mike", "Jim", "Yoshi", "Richie", "Vincent", "Stephen", "Chris"];
+      "Ryan", "Mike", "Jim", "Yoshi", "Richie", "Vincent", "Stephen"];
 
-  var mks19GroupSizes = [5,5,4,4,4]
+  var mks19GroupSizes = [4,4,4,4,4]
 
 
   var MKS19 = new ThesisGroups(mks19, mks19GroupSizes)
@@ -233,17 +233,19 @@ var buildGroups = function(){
   MKS19.generateMatrix(mks19);
   MKS19.generateFinalGroups(mks19GroupSizes);
 
- // Generate random picks
-    for(var i = 0; i < mks19.length; i++){
-      var localPicks = [];
-      for(var j = 0; j<6; j++){
-        var randomPerson = MKS19.randomGroup(mks19.length);
-        localPicks.push( mks19[randomPerson])
-      }
-      MKS19.addPicks(mks19[i], localPicks);
-    }
+ // Generate random picks for anyone who didn't send picks
+    // for(var i = 0; i < mks19.length; i++){
+    // var localPicks = [];
+    //  for(var j = 0; j<6; j++){
+    //     var randomPerson = MKS19.randomGroup(mks19.length);
+    //     localPicks.push( mks19[randomPerson])
+    //   }
+    //  // MKS19.addPicks(mks19[i], localPicks);
+    //     MKS19.addPicks("Someone", localPicks);
+    // //}
+
 //Manually add picks
-/*
+
   MKS19.addPicks("Suzanne", []);
   MKS19.addPicks("Shu", []);
   MKS19.addPicks("Matt", []);
@@ -266,7 +268,7 @@ var buildGroups = function(){
   MKS19.addPicks("Vincent", []);
   MKS19.addPicks("David", []);
 
-*/
+
 
   MKS19.pickedRanksCondensed();
   MKS19.sortRanks();
